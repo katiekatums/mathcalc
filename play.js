@@ -87,5 +87,7 @@ function check_problem() {
 }
 
 function summarize() {
-    $('#area').html('DONE: ' + stats[0] + '/' + stats[1]);
+    $("#area").html($('<div/>', {
+	"id":"summary",text:'DONE: ' + stats[0] + '/' + stats[1]
+    }));
 }

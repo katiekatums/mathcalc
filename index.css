@@ -73,7 +73,7 @@ body {
     -o-user-select: none;
     user-select: none;
 
-    -moz-box-shadow:inset 0px 1px 0px 0px #caefab;
+    -moz-box-shadow:inset 0px 1px 0px 0px #caabef;
     -webkit-box-shadow:inset 0px 1px 0px 0px #caefab;
     box-shadow:inset 0px 1px 0px 0px #caefab;
     background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #1975ff), color-stop(1, #003d99) );
@@ -101,7 +101,7 @@ body {
     font-style:normal;
     text-decoration:none;
     text-align:center;
-    text-shadow:1px 1px 0px #505070;
+    text-shadow:1px 1px 0px #caefab;
 
     width: 80px;
     height: 80px;
@@ -119,4 +119,8 @@ body {
 }.classname:active {
     position:relative;
     top:1px;
+}
+
+#summary {
+    background: #ffffff;
 }
