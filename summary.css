@@ -1,0 +1,21 @@
+#center {
+    width:640px;
+    margin-left: auto;
+    margin-right: auto;
+    font-family:Arial Black;
+    padding: 5px;
+    background: white;
+}
+
+tr, td {
+    text-align: center;
+    border: 1px solid black;
+}
+
+.correct {
+    color: green;
+}
+
+.incorrect {
+    color: red;
+}

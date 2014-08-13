@@ -14,17 +14,60 @@ $(document).ready(function () {
 
     gen_inputs();
     new_problem();
+    $('#progress span').attr('style','width: 0%');
+
     console.log('hello');
 });
 
-var guess = '';
-var problems = [];
-thisproblem = [];
-var stats = [0,0];
+var in_pile = [];
+var out_pile = [];
+var current = undefined;
+var correct = 0;
+var finalTime = undefined;
+var initTime = new Date();
+initTime = initTime.getTime();
+
+function Problem(a,b) {
+    this.a = a;
+    this.b = b;
+    this.guess = '';
+    this.op = '+';
+    console.log(a);
+};
+
+Problem.prototype.start_timer = function() {
+    this.time = new Date();
+    this.time = this.time.getTime();
+};
+
+Problem.prototype.stop_timer = function() {
+    var now = new Date();
+    this.time = (now - this.time)/1000;
+};
+
+
+Problem.prototype.problem_statement = function() {
+    return this.a + ' ' + this.op + ' ' + this.b;
+}
+
+Problem.prototype.answer = function() {
+    if(this.op == '+') {
+	return this.a + this.b;
+    }
+};
+
+Problem.prototype.correct = function() {
+    if(parseInt(this.guess) == this.answer()) {
+	console.log('correct');
+	return true;
+    } else {
+	return false;
+    }
+};
 
 function gen_inputs() {
-    var max = 12;
-    var howmany = 5;
+    var max = 10;
+    var howmany = 30;
 
     var ordered = [];
     var shuffleme = [];
@@ -48,46 +91,68 @@ function gen_inputs() {
 	shuffleme[i] = tmp;
     }
     for(var i = 0 ; i < howmany ; i++) {
-	problems.push(ordered[shuffleme[i]]);
+	var newGuy = new Problem(ordered[shuffleme[i]][0],
+				 ordered[shuffleme[i]][1]);
+	in_pile.push(newGuy);
     }
 };
 
 function num_click() {
     var button = $(this).attr('id').slice(1);
     if(button == "ENTER") {
-	check_problem();
+	current.stop_timer();
+	if(current.correct()) {
+	    correct = correct + 1;
+	    $('#sofar').html('★ '+correct);
+	}
 	new_problem();
+	var progress = out_pile.length / (out_pile.length + in_pile.length + 1);
+	$('#progress span').attr('style','width: ' + Math.floor(100*progress) + '%');
     } else if(button == "BACK") {
-	if(guess.length > 0) {
-	    guess = guess.slice(0,guess.length-1);
+	if(current.guess.length > 0) {
+	    current.guess = current.guess.slice(0,current.guess.length-1);
 	}
     } else {
-	if(guess.length < 3) {
-	    guess = guess + button;
+	if(current.guess.length < 3) {
+	    current.guess = current.guess + button;
 	}
     }
-    $('#rhs').html(guess);
+    $('#rhs').html(current.guess);
 };
 
 function new_problem() {
-    if(problems.length <= 0) {
+    if(current != undefined) {
+	out_pile.push(current);
+    }
+    if(in_pile.length <= 0) {
+	var d = new Date();
+	finalTime = d.getTime();
 	summarize();
 	return;
     }
-    thisproblem = problems.pop();
-    guess = '';
-    $('#lhs').html(thisproblem[0] + ' + ' + thisproblem[1] + ' =');
+    current = in_pile.pop();
+    current.start_timer();
+    $('#lhs').html(current.problem_statement() + ' =');
 };
 
-function check_problem() {
-    if(parseInt(guess) == (thisproblem[0] + thisproblem[1])) {
-	stats[0] += 1;
-    }
-    stats[1] += 1;
-}
-
 function summarize() {
-    $("#area").html($('<div/>', {
-	"id":"summary",text:'DONE: ' + stats[0] + '/' + stats[1]
-    }));
+    $("#area").load('summary.html', function() {
+	$("#correct").html('Correct Answers: ' + correct + '/' + out_pile.length);
+	$("#totaltime").html('Total Time: ' + (finalTime-initTime)/1000 + 's');
+	for(var i in out_pile) {
+	    console.log(out_pile[i].time);
+	    var classname = undefined;
+	    if(out_pile[i].correct()) { 
+		classname = "correct";
+	    } else {
+		classname = "incorrect";
+	    }
+	    $("#responses table").append(
+		'<tr class="' + classname + '"> <td>' + 
+		out_pile[i].problem_statement() + '</td> <td> '
+		    + out_pile[i].time + 's </td> </tr>'
+	    );
+
+	}
+    });
 }
