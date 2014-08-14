@@ -10,7 +10,8 @@ $(document).ready(function () {
 	    "class":"num", "id":"n"+others[i],text:others[i]
 	}));
     }
-    var click_event = ((document.ontouchstart) != 'null') ? 'click' : 'touchstart';
+/*    var click_event = ((document.ontouchstart) != 'null') ? 'click' : 'touchstart';*/
+    click_event = 'click';
     $('.num').bind(click_event,num_click);
 
     gen_inputs();
