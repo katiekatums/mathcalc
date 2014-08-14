@@ -12,6 +12,7 @@ $(document).ready(function () {
     }
     var click_event = ((document.ontouchstart) != 'null') ? 'click' : 'touchstart';
     $('.num').bind(click_event,num_click);
+    $('body').append(click_event);
 
     gen_inputs();
     new_problem();
