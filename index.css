@@ -96,7 +96,7 @@ body {
 }
 
 #numpad {
-    width: 260px;
+    width: 290px;
     height: 500px;
     border: 0px solid black;
     margin-left: auto;
@@ -131,10 +131,10 @@ body {
     text-align:center;
     text-shadow:1px 1px 0px #cabbef;
 
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
     margin: 2px;
-    line-height: 80px;
+    line-height: 90px;
     float: left;
     background-color:#1975ff;
 }
