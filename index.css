@@ -64,7 +64,7 @@ body {
     font-size: 50px;
     margin-left: auto;
     margin-right: auto;
-    color: #000000;
+    color: #202020;
     background-color: #f0f0f0;
     line-width: 100px;
     margin-bottom: 15px;
@@ -123,13 +123,13 @@ body {
     text-indent:0;
     border:1px solid #26168a;
     display:inline-block;
-    color:#000000;
+    color:#202020;
     font-size:40px;
     font-weight:bold;
     font-style:normal;
     text-decoration:none;
     text-align:center;
-    text-shadow:1px 1px 0px #caefab;
+    text-shadow:1px 1px 0px #cabbef;
 
     width: 80px;
     height: 80px;

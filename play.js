@@ -23,9 +23,9 @@ var in_pile = [];
 var out_pile = [];
 var current = undefined;
 var correct = 0;
-var finalTime = undefined;
-var initTime = new Date();
-initTime = initTime.getTime();
+var final_time = undefined;
+var init_time = new Date();
+init_time = init_time.getTime();
 
 function Problem(a,b) {
     this.a = a;
@@ -126,7 +126,7 @@ function new_problem() {
     }
     if(in_pile.length <= 0) {
 	var d = new Date();
-	finalTime = d.getTime();
+	final_time = d.getTime();
 	summarize();
 	return;
     }
@@ -135,11 +135,24 @@ function new_problem() {
     $('#lhs').html(current.problem_statement() + ' =');
 };
 
+function make_time(ms) {
+    var out_sec = Math.floor(ms/1000);
+    var out_min = Math.floor(out_sec/60);
+    out_sec -= out_min*60;
+    return out_min + 'm ' + out_sec + 's';
+};
+
 function summarize() {
+    out_pile.sort(function (a,b) {return b.time - a.time});
     $("#area").load('summary.html', function() {
+	if(correct == 0) {
+	    $('#center h').html('Sorry!');
+	}
 	$("#correct").html('Correct Answers: ' + correct + '/' + out_pile.length);
-	$("#totaltime").html('Total Time: ' + (finalTime-initTime)/1000 + 's');
-	for(var i in out_pile) {
+	$("#totaltime").html('Total Time: ' + make_time(final_time-init_time));
+	var mid = Math.round(out_pile.length/2)-1;
+	$("#mediantime").html('Median Time: ' + out_pile[mid].time + 's');
+	for(var i = 0 ; i < out_pile.length ; i++) {
 	    console.log(out_pile[i].time);
 	    var classname = undefined;
 	    if(out_pile[i].correct()) { 
@@ -147,12 +160,16 @@ function summarize() {
 	    } else {
 		classname = "incorrect";
 	    }
-	    $("#responses table").append(
-		'<tr class="' + classname + '"> <td>' + 
-		out_pile[i].problem_statement() + '</td> <td> '
-		    + out_pile[i].time + 's </td> </tr>'
-	    );
-
+	    $("#responses table")
+		.append($('<tr/>', {class:classname})
+			.append($('<td/>', {text:i+1}))
+			.append($('<td/>',
+				  {text:out_pile[i].problem_statement() + ' = ' +
+				   out_pile[i].answer()}))
+			.append($('<td/>',{text:out_pile[i].guess}))
+			.append($('<td/>',
+				  {text:out_pile[i].time + 's'}))
+			);
 	}
     });
 }

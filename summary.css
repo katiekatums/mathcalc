@@ -4,18 +4,37 @@
     margin-right: auto;
     font-family:Arial Black;
     padding: 5px;
+    color: #303030;
     background: white;
 }
 
-tr, td {
+#center h {
+    display: block;
     text-align: center;
-    border: 1px solid black;
+    width: 250px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 40px;
 }
 
-.correct {
-    color: green;
+#responses table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
-.incorrect {
-    color: red;
+#responses tr, #responses td {
+    text-align: center;
+    border: 1px solid #e5e5e5;
+}
+
+#center .correct {
+    background-color: #ceffce;
+    border-color: #ceffce;
+}
+
+#center .incorrect {
+    background-color: #f7c8c8;
+    border-color: #f7c8c8;
 }
