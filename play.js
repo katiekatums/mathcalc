@@ -1,3 +1,5 @@
+MACRO_ID = 'AKfycbxrAJNxj5ZvRuk0JltXGZlrroSM1EZJIanI5ZUrFZfjdzGmJP7Z';
+
 $(document).ready(function () {
     for(var i = 1 ; i <= 9 ; i++) {
 	$("#numpad").append($('<div/>', {
@@ -173,4 +175,35 @@ function summarize() {
 			);
 	}
     });
+}
+
+function submit_data() {
+    var out = {};
+    out['spamkey'] = $('#spamkey')[0].value;
+    var column = 1;
+    for(var i in out_pile) {
+	out['c'+column++] = out_pile[i].a;
+	out['c'+column++] = out_pile[i].b;
+	out['c'+column++] = out_pile[i].guess;
+	out['c'+column++] = out_pile[i].time;
+    }
+    $.ajax({
+	url:'https://script.google.com/macros/s/' + MACRO_ID + '/exec',
+	jsonp:"callback",
+	datatype:"jsonp",
+	data : out
+    });
+    return false;
+}
+
+function error_callback(e) {
+    $('#status').html(e['error']);
+}
+
+function good_callback(e) {
+    $('#status').html('Submitted: row ' + e['row']);
+    $('#submitter').prop('disabled', true);
+}
+function section(num,field) {
+    return '&c' + num + '=' + field;
 }
