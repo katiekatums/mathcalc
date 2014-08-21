@@ -1,5 +1,6 @@
 MACRO_ID = 'AKfycbxrAJNxj5ZvRuk0JltXGZlrroSM1EZJIanI5ZUrFZfjdzGmJP7Z';
 
+
 $(document).ready(function () {
     for(var i = 1 ; i <= 9 ; i++) {
 	$("#numpad").append($('<div/>', {
@@ -121,6 +122,7 @@ function num_click() {
 	}
     }
     $('#rhs').html(current.guess);
+    return false;
 };
 
 function new_problem() {
