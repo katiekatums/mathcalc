@@ -189,12 +189,12 @@ function submit_data() {
 	out['c'+column++] = out_pile[i].guess;
 	out['c'+column++] = out_pile[i].time;
     }
-    $.ajax({
-	url:'https://script.google.com/macros/s/' + MACRO_ID + '/exec',
-	jsonp:"callback",
-	datatype:"jsonp",
-	data : out
-    });
+    $('#status').html('Submitting..');
+    var scr = document.createElement('script');
+    scr.type = 'text/javascript';
+    scr.src = 'https://script.google.com/macros/s/' + MACRO_ID + '/exec?' +
+	$.param(out);
+    document.head.appendChild(scr);
     return false;
 }
 
