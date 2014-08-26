@@ -8,23 +8,19 @@
 </head>
 <body>
   <div id="area">
-
-    <div id="statusbar">
-      <div id="progress">
-	<span style="width: 25%"></span>
-      </div>
-      <div id="sofar">★ 0</div>
-    </div>
-
-    <div id="problem">
-      <div id="lhs"></div>
-      <div id="rhs"></div>
-    </div>
-
-    <div id="numpad">
-    </div>
-
+    <form name="game" action="basecalc.html">
+      op
+      +<input type="radio" name="op" value="plus" checked>
+      &#215;<input type="radio" name="op" value="mult">
+      <br>
+      max
+      <input type="text" value="10" name="max">
+      <br>
+      note
+      <input type="text" name="note">
+      <br>
+      <input type="submit" value="Submit">
+    </form>
   </div>
-  <script src="play.js"></script>
 </body>
 </html>

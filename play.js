@@ -1,6 +1,5 @@
 MACRO_ID = 'AKfycbxrAJNxj5ZvRuk0JltXGZlrroSM1EZJIanI5ZUrFZfjdzGmJP7Z';
 
-
 $(document).ready(function () {
     for(var i = 1 ; i <= 9 ; i++) {
 	$("#numpad").append($('<div/>', {
@@ -16,68 +15,64 @@ $(document).ready(function () {
     var click_event = ((document.ontouchstart) !== null) ? 'click' : 'touchstart';
     $('.num').bind(click_event,num_click);
 
-    gen_inputs();
-    new_problem();
+    game = new Game();
+    game.new_problem();
     $('#progress span').attr('style','width: 0%');
 
     console.log('hello');
 });
 
-var in_pile = [];
-var out_pile = [];
-var current = undefined;
-var correct = 0;
-var final_time = undefined;
-var init_time = new Date();
-init_time = init_time.getTime();
+var game = undefined;
 
-function Problem(a,b) {
-    this.a = a;
-    this.b = b;
-    this.guess = '';
-    this.op = '+';
-    console.log(a);
+
+function Game() {
+    this.in_pile = [];
+    this.out_pile = [];
+    this.current = undefined;
+    this.correct = 0;
+    this.final_time = undefined;
+    this.init_time = new Date();
+    this.init_time = this.init_time.getTime();
+    this.read_config();
+    this.gen_inputs(30);
 };
 
-Problem.prototype.start_timer = function() {
-    this.time = new Date();
-    this.time = this.time.getTime();
-};
-
-Problem.prototype.stop_timer = function() {
-    var now = new Date();
-    this.time = (now - this.time)/1000;
-};
-
-
-Problem.prototype.problem_statement = function() {
-    return this.a + ' ' + this.op + ' ' + this.b;
+Game.prototype.read_config = function() {
+    var qs = parse_query_string();
+    if(qs.max != undefined) {
+	var newmax = parseInt(qs.max);
+	if(newmax > 0 && newmax < 30) {
+	    // worst case here is 30*30 = 900 (only 3 digits in readout)
+	    this.max = newmax;
+	} else {
+	    this.max = 10;
+	}
+    }
+    
+    if(qs.op != undefined) {
+	if(qs.op == 'plus') {
+	    this.op = '+';
+	} else if(qs.op == 'mult') {
+	    this.op = '*';
+	} else {
+	    this.op = '+';
+	}
+    } else {
+	this.op = '+';
+    }
+    if(qs.note != undefined) {
+	this.note = qs.note[0].slice(0,20);
+    } else {
+	this.note = '';
+    }
 }
 
-Problem.prototype.answer = function() {
-    if(this.op == '+') {
-	return this.a + this.b;
-    }
-};
-
-Problem.prototype.correct = function() {
-    if(parseInt(this.guess) == this.answer()) {
-	console.log('correct');
-	return true;
-    } else {
-	return false;
-    }
-};
-
-function gen_inputs() {
-    var max = 10;
-    var howmany = 30;
-
+Game.prototype.gen_inputs = function(howmany) {
     var ordered = [];
     var shuffleme = [];
     var l = 0;
-    for(var i = 0 ; i <= max ; i++) {
-	for(var j = 0 ; j <= max ; j++) {
+    for(var i = 0 ; i <= this.max ; i++) {
+	for(var j = 0 ; j <= this.max ; j++) {
 	    ordered.push([i,j]);
 	    shuffleme.push(l);
 	    l += 1;
@@ -96,48 +91,133 @@ function gen_inputs() {
     }
     for(var i = 0 ; i < howmany ; i++) {
 	var newGuy = new Problem(ordered[shuffleme[i]][0],
-				 ordered[shuffleme[i]][1]);
-	in_pile.push(newGuy);
+				 ordered[shuffleme[i]][1],
+				this.op);
+	this.in_pile.push(newGuy);
     }
 };
+
+Game.prototype.new_problem = function() {
+    if(this.current != undefined) {
+	this.out_pile.push(this.current);
+    }
+    if(this.in_pile.length <= 0) {
+	var d = new Date();
+	this.final_time = d.getTime();
+	this.summarize();
+	return;
+    }
+    this.current = this.in_pile.pop();
+    this.current.start_timer();
+    $('#lhs').html(this.current.problem_statement() + ' =');
+};
+
+Game.prototype.summarize = function() {
+    this.out_pile.sort(function (a,b) {return b.time - a.time});
+    $("#area").load('summary.html?0.1.1', function() {
+	if(game.correct == 0) {
+	    $('#center h').html('Sorry!');
+	}
+	$("#correct").html('Correct Answers: ' + game.correct + '/' +
+			   game.out_pile.length);
+	$("#totaltime").html('Total Time: ' + make_time(game.final_time-game.init_time));
+	var mid = Math.round(game.out_pile.length/2)-1;
+	$("#mediantime").html('Median Time: ' + game.out_pile[mid].time + 's');
+	for(var i = 0 ; i < game.out_pile.length ; i++) {
+	    console.log(game.out_pile[i].time);
+	    var classname = undefined;
+	    if(game.out_pile[i].correct()) { 
+		classname = "correct";
+	    } else {
+		classname = "incorrect";
+	    }
+	    $("#responses table")
+		.append($('<tr/>', {class:classname})
+			.append($('<td/>', {text:i+1}))
+			.append($('<td/>',
+				  {text:game.out_pile[i].problem_statement() + ' = ' +
+				   game.out_pile[i].answer()}))
+			.append($('<td/>',{text:game.out_pile[i].guess}))
+			.append($('<td/>',
+				  {text:game.out_pile[i].time + 's'}))
+			);
+	}
+    });
+};
+
+function Problem(a,b,op) {
+    this.a = a;
+    this.b = b;
+    this.guess = '';
+    this.op = op;
+    console.log(a);
+};
+
+Problem.prototype.start_timer = function() {
+    this.time = new Date();
+    this.time = this.time.getTime();
+};
+
+Problem.prototype.stop_timer = function() {
+    var now = new Date();
+    this.time = (now - this.time)/1000;
+};
+
+Problem.prototype.utf8_for_op = function() {
+    if(this.op == '+') {
+	return '+';
+    } else if(this.op == '*') {
+	return '×';
+    } else {
+	return '?';
+    }
+}
+
+Problem.prototype.problem_statement = function() {
+    return this.a + ' ' + this.utf8_for_op() + ' ' + this.b;
+}
+
+Problem.prototype.answer = function() {
+    if(this.op == '+') {
+	return this.a + this.b;
+    } else if(this.op == '*') {
+	return this.a * this.b;
+    }
+};
+
+Problem.prototype.correct = function() {
+    if(parseInt(this.guess) == this.answer()) {
+	console.log('correct');
+	return true;
+    } else {
+	return false;
+    }
+};
+
 
 function num_click() {
     var button = $(this).attr('id').slice(1);
     if(button == "ENTER") {
-	current.stop_timer();
-	if(current.correct()) {
-	    correct = correct + 1;
-	    $('#sofar').html('★ '+correct);
+	game.current.stop_timer();
+	if(game.current.correct()) {
+	    game.correct = game.correct + 1;
+	    $('#sofar').html('★ '+game.correct);
 	}
-	new_problem();
-	var progress = out_pile.length / (out_pile.length + in_pile.length + 1);
+	game.new_problem();
+	var progress = game.out_pile.length / (game.out_pile.length +
+					       game.in_pile.length + 1);
 	$('#progress span').attr('style','width: ' + Math.floor(100*progress) + '%');
     } else if(button == "BACK") {
-	if(current.guess.length > 0) {
-	    current.guess = current.guess.slice(0,current.guess.length-1);
+	if(game.current.guess.length > 0) {
+	    game.current.guess = game.current.guess.slice(0,game.current.guess.length-1);
 	}
     } else {
-	if(current.guess.length < 3) {
-	    current.guess = current.guess + button;
+	if(game.current.guess.length < 3) {
+	    game.current.guess = game.current.guess + button;
 	}
     }
-    $('#rhs').html(current.guess);
+    $('#rhs').html(game.current.guess);
     return false;
-};
-
-function new_problem() {
-    if(current != undefined) {
-	out_pile.push(current);
-    }
-    if(in_pile.length <= 0) {
-	var d = new Date();
-	final_time = d.getTime();
-	summarize();
-	return;
-    }
-    current = in_pile.pop();
-    current.start_timer();
-    $('#lhs').html(current.problem_statement() + ' =');
 };
 
 function make_time(ms) {
@@ -147,47 +227,21 @@ function make_time(ms) {
     return out_min + 'm ' + out_sec + 's';
 };
 
-function summarize() {
-    out_pile.sort(function (a,b) {return b.time - a.time});
-    $("#area").load('summary.html', function() {
-	if(correct == 0) {
-	    $('#center h').html('Sorry!');
-	}
-	$("#correct").html('Correct Answers: ' + correct + '/' + out_pile.length);
-	$("#totaltime").html('Total Time: ' + make_time(final_time-init_time));
-	var mid = Math.round(out_pile.length/2)-1;
-	$("#mediantime").html('Median Time: ' + out_pile[mid].time + 's');
-	for(var i = 0 ; i < out_pile.length ; i++) {
-	    console.log(out_pile[i].time);
-	    var classname = undefined;
-	    if(out_pile[i].correct()) { 
-		classname = "correct";
-	    } else {
-		classname = "incorrect";
-	    }
-	    $("#responses table")
-		.append($('<tr/>', {class:classname})
-			.append($('<td/>', {text:i+1}))
-			.append($('<td/>',
-				  {text:out_pile[i].problem_statement() + ' = ' +
-				   out_pile[i].answer()}))
-			.append($('<td/>',{text:out_pile[i].guess}))
-			.append($('<td/>',
-				  {text:out_pile[i].time + 's'}))
-			);
-	}
-    });
-}
-
 function submit_data() {
     var out = {};
     out['spamkey'] = $('#spamkey')[0].value;
     var column = 1;
-    for(var i in out_pile) {
-	out['c'+column++] = out_pile[i].a;
-	out['c'+column++] = out_pile[i].b;
-	out['c'+column++] = out_pile[i].guess;
-	out['c'+column++] = out_pile[i].time;
+    out['c'+column++] = game.note;
+    var op = 'plus';
+    if(game.op == '*') {
+	op = 'mult';
+    }
+    out['c'+column++] = op;
+    for(var i in game.out_pile) {
+	out['c'+column++] = game.out_pile[i].a;
+	out['c'+column++] = game.out_pile[i].b;
+	out['c'+column++] = game.out_pile[i].guess;
+	out['c'+column++] = game.out_pile[i].time;
     }
     $('#status').html('Submitting..');
     var scr = document.createElement('script');
@@ -209,3 +263,12 @@ function good_callback(e) {
 function section(num,field) {
     return '&c' + num + '=' + field;
 }
+
+function parse_query_string() {
+    var query = (window.location.search || '?').substr(1),
+    map   = {};
+    query.replace(/([^&=]+)=?([^&]*)(?:&+|$)/g, function(match, key, value) {
+        (map[key] = map[key] || []).push(value);
+    });
+    return map;
+};
