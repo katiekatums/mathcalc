@@ -54,6 +54,10 @@ Game.prototype.read_config = function() {
 	    this.op = '+';
 	} else if(qs.op == 'mult') {
 	    this.op = '*';
+	} else if(qs.op == 'div') {
+	    this.op = '/';
+	} else if(qs.op == 'minus') {
+	    this.op = '-';
 	} else {
 	    this.op = '+';
 	}
@@ -73,6 +77,10 @@ Game.prototype.gen_inputs = function(howmany) {
     var l = 0;
     for(var i = 0 ; i <= this.max ; i++) {
 	for(var j = 0 ; j <= this.max ; j++) {
+	    if(this.op == '/' && i == 0) {
+		// no divide by zero questions
+		continue;
+	    }
 	    ordered.push([i,j]);
 	    shuffleme.push(l);
 	    l += 1;
@@ -90,9 +98,21 @@ Game.prototype.gen_inputs = function(howmany) {
 	shuffleme[i] = tmp;
     }
     for(var i = 0 ; i < howmany ; i++) {
-	var newGuy = new Problem(ordered[shuffleme[i]][0],
-				 ordered[shuffleme[i]][1],
-				this.op);
+	if(this.op == '+' || this.op == '*') {
+	    var newGuy = new Problem(ordered[shuffleme[i]][0],
+				     ordered[shuffleme[i]][1],
+				     this.op);
+	} else if(this.op == '-') {
+	    var newGuy = new Problem(ordered[shuffleme[i]][0]
+				     + ordered[shuffleme[i]][1],
+				     ordered[shuffleme[i]][0],
+				     this.op);
+	} else if(this.op == '/') {
+	    var newGuy = new Problem(ordered[shuffleme[i]][0]
+				     * ordered[shuffleme[i]][1],
+				     ordered[shuffleme[i]][0],
+				     this.op);
+	}
 	this.in_pile.push(newGuy);
     }
 };
@@ -164,10 +184,10 @@ Problem.prototype.stop_timer = function() {
 };
 
 Problem.prototype.utf8_for_op = function() {
-    if(this.op == '+') {
-	return '+';
-    } else if(this.op == '*') {
+    if(this.op == '*') {
 	return '×';
+    } else if(this.op == '-' || this.op == '+' || this.op == '/') {
+	return this.op;
     } else {
 	return '?';
     }
@@ -182,6 +202,10 @@ Problem.prototype.answer = function() {
 	return this.a + this.b;
     } else if(this.op == '*') {
 	return this.a * this.b;
+    } else if(this.op == '-') {
+	return this.a - this.b;
+    } else if(this.op == '/') {
+	return this.a / this.b;
     }
 };
 
@@ -235,6 +259,10 @@ function submit_data() {
     var op = 'plus';
     if(game.op == '*') {
 	op = 'mult';
+    } else if(game.op == '/') {
+	op = 'div';
+    } else if(game.op == '-') {
+	op = 'minus';
     }
     out['c'+column++] = op;
     for(var i in game.out_pile) {
