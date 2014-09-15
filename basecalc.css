@@ -60,7 +60,7 @@ body {
 }
 
 #problem {
-    width: 380px;
+    width: 420px;
     height: 100px;
     font-size: 50px;
     margin-left: auto;
@@ -86,7 +86,7 @@ body {
 
 #lhs {
     float: left;
-    width : 250px;
+    width : 280px;
 }
 
 #rhs {
