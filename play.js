@@ -1,5 +1,7 @@
 MACRO_ID = 'AKfycbxrAJNxj5ZvRuk0JltXGZlrroSM1EZJIanI5ZUrFZfjdzGmJP7Z';
 
+div = '\xf7';
+
 $(document).ready(function () {
     for(var i = 1 ; i <= 9 ; i++) {
 	$("#numpad").append($('<div/>', {
@@ -55,7 +57,7 @@ Game.prototype.read_config = function() {
 	} else if(qs.op == 'mult') {
 	    this.op = '*';
 	} else if(qs.op == 'div') {
-	    this.op = '/';
+	    this.op = div;
 	} else if(qs.op == 'minus') {
 	    this.op = '-';
 	} else {
@@ -77,7 +79,7 @@ Game.prototype.gen_inputs = function(howmany) {
     var l = 0;
     for(var i = 0 ; i <= this.max ; i++) {
 	for(var j = 0 ; j <= this.max ; j++) {
-	    if(this.op == '/' && i == 0) {
+	    if(this.op == div && i == 0) {
 		// no divide by zero questions
 		continue;
 	    }
@@ -107,7 +109,7 @@ Game.prototype.gen_inputs = function(howmany) {
 				     + ordered[shuffleme[i]][1],
 				     ordered[shuffleme[i]][0],
 				     this.op);
-	} else if(this.op == '/') {
+	} else if(this.op == div) {
 	    var newGuy = new Problem(ordered[shuffleme[i]][0]
 				     * ordered[shuffleme[i]][1],
 				     ordered[shuffleme[i]][0],
@@ -186,7 +188,7 @@ Problem.prototype.stop_timer = function() {
 Problem.prototype.utf8_for_op = function() {
     if(this.op == '*') {
 	return '×';
-    } else if(this.op == '-' || this.op == '+' || this.op == '/') {
+    } else if(this.op == '-' || this.op == '+' || this.op == div) {
 	return this.op;
     } else {
 	return '?';
@@ -204,7 +206,7 @@ Problem.prototype.answer = function() {
 	return this.a * this.b;
     } else if(this.op == '-') {
 	return this.a - this.b;
-    } else if(this.op == '/') {
+    } else if(this.op == div) {
 	return this.a / this.b;
     }
 };
@@ -259,7 +261,7 @@ function submit_data() {
     var op = 'plus';
     if(game.op == '*') {
 	op = 'mult';
-    } else if(game.op == '/') {
+    } else if(game.op == div) {
 	op = 'div';
     } else if(game.op == '-') {
 	op = 'minus';
